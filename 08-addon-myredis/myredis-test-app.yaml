@@ -1,0 +1,47 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: redis-demo
+  namespace: vela-demo-env
+spec:
+  components:
+    - name: myredis
+      type: myredis
+      properties:
+        serviceType: NodePort
+    - name: web
+      type: webservice
+      properties:
+        image: quay.io/garycncf/go-redis-app:1.0.0
+        port: 8080
+      traits:
+        - type: service-binding
+          properties:
+            envMappings:
+              REDIS_PASSWORD:
+                secret: myredis-secret
+                key: password
+              REDIS_HOST:
+                secret: myredis-secret
+                key: ip
+              REDIS_PORT:
+                secret: myredis-secret
+                key: port
+    - name: service
+      type: k8s-objects
+      properties:
+        objects:
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: web
+          labels:
+            app: web
+          spec:
+            type: NodePort
+            ports:
+              - name: web
+                port: 8080
+                targetPort: 8080
+            selector:
+              app.oam.dev/component: web

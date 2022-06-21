@@ -1,0 +1,17 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: words-demo
+  namespace: vela-demo-env
+spec:
+  components:
+  - name: words-demo
+    type: kustomize
+    properties:
+      repoType: git
+      url: https://github.com/garycncf/words-demo-gitops
+      # secretRef: git-secret
+      pullInterval: 10m
+      git:
+        branch: master
+      path: ./kustomize

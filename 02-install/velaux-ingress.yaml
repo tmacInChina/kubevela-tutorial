@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: velaux
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: kubevela.stduser<xx>.ocplab.cn
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: velaux
+            port:
+              number: 80

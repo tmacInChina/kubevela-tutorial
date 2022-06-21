@@ -1,0 +1,38 @@
+apiVersion: core.oam.dev/v1beta1
+kind: ComponentDefinition
+metadata:
+  annotations:
+    definition.oam.dev/description: My StatefulSet component.
+  name: statefulset
+  namespace: vela-system
+spec:
+  schematic:
+    cue:
+      template: "output: {\n\tmetadata: name: context.name\n\tspec: {\n\t\tminReadySeconds:
+        10\n\t\treplicas:        parameter.replicas\n\t\tselector: matchLabels: app:
+        context.name\n\t\tserviceName: context.name\n\t\ttemplate: {\n\t\t\tmetadata:
+        labels: app: context.name\n\t\t\tspec: {\n\t\t\t\tcontainers: [{\n\t\t\t\t\tname:
+        \ context.name\n\t\t\t\t\timage: parameter.image\n\t\t\t\t\tif parameter[\"args\"]
+        != _|_ {\n\t\t\t\t\t\targs: parameter.args\n\t\t\t\t\t}\n\t\t\t\t\tif parameter[\"env\"]
+        != _|_ {\n\t\t\t\t\t\tenv: parameter.env\n\t\t\t\t\t}\n\t\t\t\t\tports: [{\n\t\t\t\t\t\tname:
+        \         \"tcp\"\n\t\t\t\t\t\tcontainerPort: parameter.port\n\t\t\t\t\t}]\n\t\t\t\t\tvolumeMounts:
+        [{\n\t\t\t\t\t\tname:      \"data\"\n\t\t\t\t\t\tmountPath: parameter.dataMountPath\n\t\t\t\t\t}]\n\t\t\t\t}]\n\t\t\t\tterminationGracePeriodSeconds:
+        10\n\t\t\t}\n\t\t}\n\t\tvolumeClaimTemplates: [{\n\t\t\tmetadata: name: \"data\"\n\t\t\tspec:
+        {\n\t\t\t\taccessModes: [\"ReadWriteOnce\"]\n\t\t\t\tresources: requests:
+        storage: \"\\( parameter.storageSize )\" + \"Gi\"\n\t\t\t\tstorageClassName:
+        parameter.storageClassName\n\t\t\t}\n\t\t}]\n\t}\n\tapiVersion: \"apps/v1\"\n\tkind:
+        \      \"StatefulSet\"\n}\noutputs: nginx: {\n\tmetadata: {\n\t\tname: context.name\n\t\tlabels:
+        app: context.name\n\t}\n\tspec: {\n\t\tports: [{\n\t\t\tname: \"tcp\"\n\t\t\tport:
+        parameter.port\n\t\t}]\n\t\tselector: app: context.name\n\t\tclusterIP: \"None\"\n\t}\n\tapiVersion:
+        \"v1\"\n\tkind:       \"Service\"\n}\nparameter: {\n\treplicas: *1 | int\n\timage:
+        \   string\n\targs?: [...string]\n\tenv?: [...{\n\t\tname:  string\n\t\tvalue:
+        string\n\t}]\n\tport:             int\n\tdataMountPath:    string\n\tstorageSize:
+        \     *1 | int\n\tstorageClassName: string\n}\n"
+  status:
+    customStatus: <your-code-here>
+    healthPolicy: <your-code-here>
+  workload:
+    definition:
+      apiVersion: apps/v1
+      kind: StatefulSet
+    type: statefulsets.apps

@@ -1,0 +1,12 @@
+name: myredis
+version: 1.0.0
+description: Extended workload to support myredis
+url: https://example.com
+
+tags:
+  - redis
+  - only_example
+
+deployTo:
+  control_plane: true
+  runtime_cluster: false

@@ -1,0 +1,9 @@
+- jsonKey: hostPath
+  lable: hostPath
+  sort: 1
+- jsonKey: serviceType
+  lable: Service Type
+  sort: 2
+- jsonkey: redisPassword
+  lable: Redis Password
+  sort: 3

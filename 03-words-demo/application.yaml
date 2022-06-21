@@ -1,0 +1,81 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: words-demo
+  namespace: vela-demo-env
+spec:
+  components:
+  - dependsOn:
+    - words-demo-api
+    name: words-demo-web
+    properties:
+      cpu: "0.1"
+      env:
+      - name: WORDS_API_SERVICE
+        value: words-demo-api
+      exposeType: NodePort
+      image: quay.io/garycncf/words-demo-web:version1
+      imagePullPolicy: IfNotPresent
+      memory: 128Mi
+      ports:
+      - expose: true
+        port: 80
+        protocol: TCP
+    traits:
+    - properties:
+        replicas: 1
+      type: scaler
+    type: webservice
+  - dependsOn:
+    - words-demo-db
+    name: words-demo-api
+    properties:
+      cpu: "0.1"
+      env:
+      - name: WORDS_DB_SERVICE
+        value: words-demo-db
+      exposeType: ClusterIP
+      image: quay.io/garycncf/words-demo-api:version1
+      imagePullPolicy: IfNotPresent
+      memory: 128Mi
+      ports:
+      - expose: true
+        port: 8080
+        protocol: TCP
+    traits:
+    - properties:
+        replicas: 1
+      type: scaler
+    type: webservice
+  - name: words-demo-db
+    properties:
+      cpu: "0.2"
+      exposeType: ClusterIP
+      image: quay.io/garycncf/words-demo-db:version1
+      memory: 256Mi
+      ports:
+      - expose: true
+        port: 5432
+        protocol: TCP
+    traits:
+    - properties:
+        replicas: 1
+      type: scaler
+    type: webservice
+  policies:
+  - name: localclu-target
+    properties:
+      clusters:
+      - local
+      namespace: vela-demo-env
+    type: topology
+  workflow:
+    steps:
+    - name: localclu-target
+      properties:
+        auto: true
+        ignoreTerraformComponent: true
+        parallelism: 5
+        policies:
+        - localclu-target
+      type: deploy
